@@ -1,5 +1,4 @@
-import { use, useEffect, useRef } from 'react';
-
+import { use, useCallback, useEffect, useRef } from 'react';
 
 interface BlobInterface {
   x: number;
@@ -67,43 +66,55 @@ export default function BackgroundCanvas() {
   const blobsRef = useRef<Blob[]>([]);
   const rafRef = useRef<number | null>(0);
 
-  useEffect(() => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext('2d')!;
+  const initBlobs = useCallback((canvas: HTMLCanvasElement) => {
+    if (!canvas) return;
 
-    function initBlobs() {
-      blobsRef.current.length = 0; // Clear existing blobs
-      const blobsCount = Math.floor((canvas.width * canvas.height) / 15000);
-      for (let i = 0; i < blobsCount; i++) {
-        blobsRef.current.push(new Blob());
-      }
+    blobsRef.current = [];
+    const blobsCount = Math.floor((canvas.width * canvas.height) / 15000);
+    for (let i = 0; i < blobsCount; i++) {
+      blobsRef.current.push(new Blob());
     }
+  }, []);
 
-    const resizeCanvas = () => {
+  const resizeCanvas = useCallback(
+    (canvas: HTMLCanvasElement) => {
+      if (!canvas) return;
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-    };
+      initBlobs(canvas);
+    },
+    [initBlobs]
+  );
 
-    const animate = () => {
+  const animate = useCallback(
+    (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
+      if(!canvas || !ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       blobsRef.current.forEach((b) => {
         b.update(canvas.width, canvas.height);
         b.draw(ctx);
       });
-      rafRef.current = requestAnimationFrame(animate);
-    };
+      rafRef.current = requestAnimationFrame(() => animate(canvas, ctx));
+    },
+    []
+  );
 
-    function handleResize() {
-      resizeCanvas();
-      initBlobs();
+  const handleResize = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      resizeCanvas(canvas);
     }
+  }, [resizeCanvas]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext('2d')!;
 
     window.addEventListener('resize', handleResize);
 
-    resizeCanvas();
-    initBlobs();
-    animate();
+    resizeCanvas(canvas);
+    animate(canvas, ctx);
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
