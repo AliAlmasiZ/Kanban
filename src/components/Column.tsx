@@ -17,7 +17,7 @@ export default function Column({
   onDeleteColumn,
 }: ColumnProps) {
   return (
-    <div className="relative flex flex-col min-w-75 h-full p-6 bg-white/10 shadow-lg rounded-2xl border border-white/10  transition-all duration-300 backdrop-blur-lg text-white bg-linear-to-b from-white/10 to-transparent items-center overflow-hidden">
+    <div className="relative flex flex-col min-w-75 j m-5 p-6 bg-white/10 shadow-lg rounded-2xl border border-white/10  transition-all duration-300 backdrop-blur-lg text-white bg-linear-to-b from-white/10 to-transparent items-center overflow-hidden">
       <header className="relative flex flex-row w-11/12 p-2 transparent">
         <button
           onClick={onDeleteColumn}
