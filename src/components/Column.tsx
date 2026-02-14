@@ -42,7 +42,13 @@ export default function Column({
   return (
     <div
       ref={setNodeRef}
-      className={`relative flex flex-col min-w-100 h-[80vh] m-5 p-6 shadow-lg rounded-2xl border bg-gray-100/80 border-gray-200 text-gray-800 dark:bg-white/10 dark:border-white/10 dark:text-white dark:bg-linear-to-b dark:from-white/10 dark:to-transparent transition-all duration-300 backdrop-blur-lg items-center overflow-hidden shrink-0 ${isOver ? 'bg-green-50/50 border-green-400/50 scale-[1.02] dark:bg-white/20' : 'hover:bg-gray-200/50 hover:border-gray-300 dark:hover:bg-white/5 dark:hover:border-white/20'}`}
+      className={`relative flex flex-col h-[80vh] m-5 p-6
+        w-10/12 md:min-w-100 md:max-w-110 
+      shadow-lg rounded-2xl border bg-gray-100/80 border-gray-200 text-gray-800
+       dark:bg-white/10 dark:border-white/10 dark:text-white dark:bg-linear-to-b dark:from-white/10 dark:to-transparent 
+       transition-all duration-300 backdrop-blur-lg items-center overflow-hidden shrink-0
+        ${isOver ? 'bg-green-50/50 border-green-400/50 scale-[1.02] dark:bg-white/20' :
+         'hover:bg-gray-200/50 hover:border-gray-300 dark:hover:bg-white/5 dark:hover:border-white/20'}`}
       // className={`relative flex flex-col min-w-100 h-[80vh] m-5 p-6
       // bg-white/10 shadow-lg rounded-2xl border border-white/10
       //   transition-all duration-300 backdrop-blur-lg text-white bg-linear-to-b from-white/10 to-transparent

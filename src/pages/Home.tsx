@@ -435,7 +435,7 @@ export default function Home() {
         onDragEnd={handleDragEnd}
       >
         {/* <div className="container mx-auto pb-16  gap-5 h-full grid grid-cols-1 lg:grid-cols-3 items-stretch"> */}
-        <div className="container mx-auto pb-16 h-full flex  gap-5 items-start overflow-x-auto overflow-y-hidden no-scrollbar">
+        <div className="container mx-auto pb-16 h-full flex flex-col md:flex-row w-full gap-5 items-center md:items-start overflow-x-hidden overflow-y-auto md:overflow-x-auto md:overflow-y-hidden no-scrollbar">
           {filteredColumns.map((column) => (
             <Column
               column={column}
