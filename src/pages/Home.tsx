@@ -141,6 +141,8 @@ export default function Home() {
   const [activeTask, setActiveTask] = useState<TaskItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [addingToColumnId, setAddingToColumnId] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
+  const [deletingTask, setDeletingTask] = useState<TaskItem | null>(null);
 
   useEffect(() => {
     localStorage.setItem('columns', JSON.stringify(columns));
@@ -302,10 +304,52 @@ export default function Home() {
     closeModal();
   }
 
-  function deleteColumn(columnId: string) {
-    setColumns((prevColumns) =>
-      prevColumns.filter((col) => col.id !== columnId)
+  function handleUpdateTask(updatedData: any) {
+    if (!editingTask) return;
+
+    const containerCol = findColumnContainingTask(editingTask.id);
+    if (!containerCol) return;
+
+    setColumns((prev) =>
+      prev.map((col) => {
+        if (col.id === containerCol.id) {
+          return {
+            ...col,
+            tasks: col.tasks.map((t) =>
+              t.id === editingTask.id ? { ...t, ...updatedData } : t
+            ),
+          };
+        }
+        return col;
+      })
     );
+    setEditingTask(null);
+  }
+
+  function confirmDeleteTask() {
+    if (!deletingTask) return;
+
+    const containerCol = findColumnContainingTask(deletingTask.id);
+    if (!containerCol) return;
+
+    setColumns((prev) =>
+      prev.map((col) => {
+        if (col.id === containerCol.id) {
+          return {
+            ...col,
+            tasks: col.tasks.filter((t) => t.id !== deletingTask.id),
+          };
+        }
+        return col;
+      })
+    );
+    setDeletingTask(null);
+  }
+
+  function deleteColumn(columnId: string) {
+    // setColumns((prevColumns) =>
+    //   prevColumns.filter((col) => col.id !== columnId)
+    // );
   }
 
   function deleteTask(colomnId: string, taskId: string) {}
@@ -334,8 +378,9 @@ export default function Home() {
                   key={task.id}
                   task={task}
                   onDelete={() => {
-                    deleteTask(column.id, task.id);
+                    setDeletingTask(task);
                   }}
+                  onClick={() => setEditingTask(task)}
                 />
               ))}
             </Column>
@@ -359,8 +404,52 @@ export default function Home() {
           document.body
         )}
 
+        {/* Add new Task */}
         <Modal isOpen={isModalOpen} onClose={closeModal} title="Add New Task">
           <TaskForm onSubmit={handleCreatTask} onCancel={closeModal} />
+        </Modal>
+
+        {/* Edit Task */}
+        <Modal
+          isOpen={!!editingTask}
+          onClose={() => setEditingTask(null)}
+          title="Edit Task"
+        >
+          {editingTask && (
+            <TaskForm
+              initialData={editingTask}
+              onSubmit={handleUpdateTask}
+              onCancel={() => setEditingTask(null)}
+            />
+          )}
+        </Modal>
+
+        {/* Delete Task */}
+        <Modal
+          isOpen={!!deletingTask}
+          onClose={() => setDeletingTask(null)}
+          title="Delete Task"
+        >
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              Are you sure you want to delete this item? This action cannot be
+              undone.
+            </p>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setDeletingTask(null)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteTask}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </Modal>
       </DndContext>
     </>
