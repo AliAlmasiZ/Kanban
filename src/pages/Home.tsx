@@ -19,7 +19,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { createPortal } from 'react-dom';
 import Modal from '@/components/Modal';
 import TaskForm from '@/components/TaskForm';
-import SearchBar from '@/components/SearchBar';
+import SearchBar from '@/components/ToolBar';
 
 // I HATE STYLING
 
@@ -144,6 +144,7 @@ export default function Home() {
   const [addingToColumnId, setAddingToColumnId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
   const [deletingTask, setDeletingTask] = useState<TaskItem | null>(null);
+  const [deletingColumn, setDeletingColumn] = useState<ColumnType | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState<
     'All' | 'Low' | 'Medium' | 'High'
@@ -155,7 +156,6 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem('columns', JSON.stringify(columns));
   }, [columns]);
-
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -357,6 +357,13 @@ export default function Home() {
     setDeletingTask(null);
   }
 
+  function confirmDeleteColumn() {
+    if (!deletingColumn) return;
+
+    setColumns((prev) => prev.filter((col) => col.id !== deletingColumn.id));
+    setDeletingColumn(null);
+  }
+
   const filteredColumns = columns.map((col) => {
     const filteredTasks = col.tasks.filter((task) => {
       const matchesSearch =
@@ -391,10 +398,21 @@ export default function Home() {
     };
   });
 
-  function deleteColumn(columnId: string) {
-    // setColumns((prevColumns) =>
-    //   prevColumns.filter((col) => col.id !== columnId)
-    // );
+  function updateColumnTitle(columnId: string, newTitle: string) {
+    setColumns((prev) =>
+      prev.map((col) =>
+        col.id === columnId ? { ...col, title: newTitle } : col
+      )
+    );
+  }
+
+  function addColumn() {
+    const newColumn: ColumnType = {
+      id: crypto.randomUUID(),
+      title: `New Column`,
+      tasks: [],
+    };
+    setColumns([...columns, newColumn]);
   }
 
   return (
@@ -407,6 +425,7 @@ export default function Home() {
         setFilterPriority={setFilterPriority}
         sortBy={sortBy}
         setSortBy={setSortBy}
+        addColumn={addColumn}
       />
       <DndContext
         sensors={sensors}
@@ -415,15 +434,19 @@ export default function Home() {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="container mx-auto pb-16  gap-5 h-full grid grid-cols-1 lg:grid-cols-3 items-stretch">
+        {/* <div className="container mx-auto pb-16  gap-5 h-full grid grid-cols-1 lg:grid-cols-3 items-stretch"> */}
+        <div className="container mx-auto pb-16 h-full flex  gap-5 items-start overflow-x-auto overflow-y-hidden no-scrollbar">
           {filteredColumns.map((column) => (
             <Column
               column={column}
               key={column.id}
               onAddTask={() => openAddTaskModal(column.id)}
               onDeleteColumn={() => {
-                deleteColumn(column.id);
+                setDeletingColumn(column);
               }}
+              onUpdateTitle={(newTitle) =>
+                updateColumnTitle(column.id, newTitle)
+              }
             >
               {column.tasks.map((task: TaskItem) => (
                 <TaskCard
@@ -469,9 +492,12 @@ export default function Home() {
 
         {/* Delete Task */}
         <Modal
-          isOpen={!!deletingTask}
-          onClose={() => setDeletingTask(null)}
-          title="Delete Task"
+          isOpen={!!deletingTask || !!deletingColumn}
+          onClose={() => {
+            setDeletingTask(null);
+            setDeletingColumn(null);
+          }}
+          title={`${deletingTask ? 'Delete Task' : 'Delete Column'}`}
         >
           <div className="space-y-4">
             <p className="text-gray-600">
@@ -480,13 +506,22 @@ export default function Home() {
             </p>
             <div className="flex justify-center gap-3">
               <button
-                onClick={() => setDeletingTask(null)}
+                onClick={() => {
+                  setDeletingTask(null);
+                  setDeletingColumn(null);
+                }}
                 className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                onClick={confirmDeleteTask}
+                onClick={() => {
+                  if (deletingTask) {
+                    confirmDeleteTask();
+                  } else if (deletingColumn) {
+                    confirmDeleteColumn();
+                  }
+                }}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 cursor-pointer"
               >
                 Delete

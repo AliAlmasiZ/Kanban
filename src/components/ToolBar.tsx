@@ -1,24 +1,26 @@
 import type { ColumnType } from '@/types/kanban';
-import { ArrowUpDown, Filter, Search } from 'lucide-react';
+import { ArrowUpDown, Filter, PlusCircleIcon, Search } from 'lucide-react';
 import { useState } from 'react';
 
-interface SearchBarProps {
+interface ToolBarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   filterPriority: 'All' | 'Low' | 'Medium' | 'High';
   setFilterPriority: (priority: 'All' | 'Low' | 'Medium' | 'High') => void;
   sortBy: 'Manual' | 'Date' | 'Priority';
   setSortBy: (sort: 'Date' | 'Priority') => void;
+  addColumn: () => void;
 }
 
-export default function SearchBar({
+export default function ToolBar({
   searchQuery,
   setSearchQuery,
   filterPriority,
   setFilterPriority,
   sortBy,
   setSortBy,
-}: SearchBarProps) {
+  addColumn
+}: ToolBarProps) {
   return (
     <div className="w-10/12 mx-auto px-10 pt-10 pb-2">
       <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 flex flex-col md:flex-row gap-4 items-center justify-between text-white">
@@ -74,6 +76,14 @@ export default function SearchBar({
                 Sort by Priority
               </option>
             </select>
+          </div>
+          <div className="relative flex items-center rounded-lg px-3">
+            <button
+              onClick={addColumn}
+              className="flex items-center gap-2 bg-indigo-500/80 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/20 active:scale-95 h-10 cursor-pointer"
+            >
+              <PlusCircleIcon scale={18}/> Add Column
+            </button>
           </div>
         </div>
       </div>
