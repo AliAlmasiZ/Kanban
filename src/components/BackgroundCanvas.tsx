@@ -1,3 +1,4 @@
+import { useTheme } from '@/hooks/useTheme';
 import { use, useCallback, useEffect, useRef } from 'react';
 
 interface BlobInterface {
@@ -65,6 +66,7 @@ export default function BackgroundCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const blobsRef = useRef<Blob[]>([]);
   const rafRef = useRef<number | null>(0);
+  const { theme } = useTheme();
 
   const initBlobs = useCallback((canvas: HTMLCanvasElement) => {
     if (!canvas) return;
@@ -88,7 +90,7 @@ export default function BackgroundCanvas() {
 
   const animate = useCallback(
     (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
-      if(!canvas || !ctx) return;
+      if (!canvas || !ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       blobsRef.current.forEach((b) => {
@@ -123,6 +125,9 @@ export default function BackgroundCanvas() {
   }, []);
 
   return (
-    <canvas ref={canvasRef} className="fixed inset-0 -z-10 bg-slate-950" />
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 -z-10 bg-gray-350 dark:bg-slate-950 transition-colors duration-500"
+    />
   );
 }

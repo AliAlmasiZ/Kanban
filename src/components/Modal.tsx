@@ -8,7 +8,12 @@ interface ModalProps {
   children: React.ReactNode;
 }
 
-export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export default function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+}: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -51,22 +56,22 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         p-0 rounded-xl shadow-2xl w-full max-w-md 
         backdrop:bg-black/50 backdrop:backdrop-blur-sm
         open:animate-in open:fade-in open:zoom-in-95 duration-200
-        bg-white text-gray-900 m-auto
+        bg-white dark:bg-slate-900 
+        text-gray-900 dark:text-gray-100
+        transition-colors m-auto
       "
     >
-      <header className="flex items-center justify-between p-4 border-b border-gray-100">
+      <header className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-slate-800">
         <h2 className="text-lg font-bold">{title}</h2>
         <button
           onClick={onClose}
-          className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+          className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
         >
           <X size={20} />
         </button>
       </header>
 
-      <main className="p-4">
-        {children}
-      </main>
+      <main className="p-4">{children}</main>
     </dialog>
   );
 }

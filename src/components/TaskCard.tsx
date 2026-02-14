@@ -50,36 +50,55 @@ export default function TaskCard(props: TaskCardProps) {
   );
 }
 
-export function TaskCardContent({ task, onDelete, onClick, dragDisabled }: TaskCardProps) {
+export function TaskCardContent({
+  task,
+  onDelete,
+  onClick,
+  dragDisabled,
+}: TaskCardProps) {
   return (
     <div
       onClick={onClick}
-      className={`group relative bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all w-full ${dragDisabled ? '' : 'cursor-grab'}`}
+      className={`group relative 
+        bg-white dark:bg-slate-800 
+        text-gray-900 dark:text-gray-100
+        p-4 rounded-xl shadow-sm border 
+        border-gray-200 dark:border-slate-700
+        hover:shadow-md transition-all w-full 
+        ${dragDisabled ? '' : 'cursor-grab'}`}
+      // className={`group relative bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all w-full ${dragDisabled ? '' : 'cursor-grab'}`}
     >
       <header className="flex justify-between items-start mb-2">
-        <h3 className="font-semibold text-gray-800">{task.title}</h3>
+        <h3 className="font-semibold text-gray-800 dark:text-gray-100">
+          {task.title}
+        </h3>
         <button
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
             onDelete!();
           }}
-          className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+          className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
         >
           <X size={20} />
         </button>
       </header>
 
       <main className="space-y-1 mb-4">
-        <p className="text-sm text-gray-600 whitespace-pre-wrap">
+        <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+          {' '}
           {task.description}
         </p>
       </main>
 
-      <footer className="flex justify-between items-center text-xs text-gray-500">
+      <footer className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+        {' '}
         <div className="flex flex-wrap gap-2">
           {task.labels.map((label) => (
-            <span key={label} className="bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-medium">
+            <span
+              key={label}
+              className="bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded text-gray-600 dark:text-gray-300 font-medium"
+            >
               {label}
             </span>
           ))}
