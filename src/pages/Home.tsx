@@ -17,9 +17,12 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { createPortal } from 'react-dom';
+import Modal from '@/components/Modal';
+import TaskForm from '@/components/TaskForm';
 
 // I HATE STYLING
 
+// Initial Dummy Columns and Tasks - Just for testing.
 const initialColumns: ColumnType[] = [
   {
     id: 'col-1',
@@ -133,9 +136,11 @@ function getInitialColumns(): ColumnType[] {
 }
 
 export default function Home() {
+  // States
   const [columns, setColumns] = useState<ColumnType[]>(getInitialColumns());
   const [activeTask, setActiveTask] = useState<TaskItem | null>(null);
-  const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [addingToColumnId, setAddingToColumnId] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem('columns', JSON.stringify(columns));
@@ -148,6 +153,8 @@ export default function Home() {
       },
     })
   );
+
+  /* Drag & Drop functions */
 
   function findColumnContainingTask(taskId: string) {
     return columns.find((col) => col.tasks.some((t) => t.id === taskId));
@@ -163,7 +170,6 @@ export default function Home() {
       const task = col.tasks.find((t) => t.id === activeId);
       if (task) {
         setActiveTask(task);
-        setActiveColumnId(col.id);
       }
     }
   }
@@ -258,8 +264,42 @@ export default function Home() {
     setActiveTask(null);
   }
 
-  function handleAddTask(columnId: string, task: TaskItem) {
-    // TODO: Open a modal to get task details and then add the task to the column
+  /* ---- */
+
+  function openAddTaskModal(columnId: string) {
+    setAddingToColumnId(columnId);
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+    setAddingToColumnId(null);
+  }
+
+  function handleCreatTask(formData: any) {
+    if (!addingToColumnId) return;
+
+    const newTask: TaskItem = {
+      id: `task-${crypto.randomUUID()}`,
+      title: formData.title,
+      description: formData.description,
+      priority: formData.priority,
+      labels: formData.labels,
+      createdAt: new Date().toISOString(),
+    };
+
+    setColumns((prev) =>
+      prev.map((col) => {
+        if (col.id === addingToColumnId) {
+          return {
+            ...col,
+            tasks: [...col.tasks, newTask],
+          };
+        }
+        return col;
+      })
+    );
+    closeModal();
   }
 
   function deleteColumn(columnId: string) {
@@ -284,7 +324,7 @@ export default function Home() {
             <Column
               column={column}
               key={column.id}
-              onAddTask={() => {}}
+              onAddTask={() => openAddTaskModal(column.id)}
               onDeleteColumn={() => {
                 deleteColumn(column.id);
               }}
@@ -318,6 +358,10 @@ export default function Home() {
           </DragOverlay>,
           document.body
         )}
+
+        <Modal isOpen={isModalOpen} onClose={closeModal} title="Add New Task">
+          <TaskForm onSubmit={handleCreatTask} onCancel={closeModal} />
+        </Modal>
       </DndContext>
     </>
   );
