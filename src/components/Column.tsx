@@ -1,23 +1,41 @@
+import type { ColumnType } from '@/types/kanban';
+import { useDroppable } from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { Trash2, Plus } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 
 interface ColumnProps {
-  title: string;
-  count: number;
+  column: ColumnType;
   children: ReactNode;
   onDeleteColumn: () => void;
   onAddTask: () => void;
 }
 
 export default function Column({
-  title,
-  count,
+  column: { id, title, tasks},
   children,
   onAddTask,
   onDeleteColumn,
 }: ColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: id,
+    data: { type: 'Column', columnId: id },
+  });
+  const taskIds = useMemo(() => tasks.map((task) => task.id), [tasks]);
+
   return (
-    <div className="relative flex flex-col min-w-75 h-[80vh] m-5 p-6 bg-white/10 shadow-lg rounded-2xl border border-white/10  transition-all duration-300 backdrop-blur-lg text-white bg-linear-to-b from-white/10 to-transparent items-center overflow-hidden">
+    <div
+      ref={setNodeRef}
+      className={`relative flex flex-col min-w-75 h-[80vh] m-5 p-6
+      bg-white/10 shadow-lg rounded-2xl border border-white/10
+        transition-all duration-300 backdrop-blur-lg text-white bg-linear-to-b from-white/10 to-transparent 
+        items-center overflow-hidden
+        ${isOver ? 'bg-white/20 border-green-400/50 scale-[1.02]' : 'hover:bg-white/5 hover:border-white/20'}
+        `}
+    >
       <header className="relative flex flex-row w-11/12 p-2 transparent">
         <button
           onClick={onDeleteColumn}
@@ -37,9 +55,13 @@ export default function Column({
           <Plus />
         </button>
       </header>
-      <main className='flex-1 w-full p-3 overflow-y-auto no-scrollbar'>
-        {children}
-
+      <main className="flex-1 w-full p-3 overflow-y-auto no-scrollbar">
+        <SortableContext
+          items={taskIds}
+          strategy={verticalListSortingStrategy}
+        >
+          {children}
+        </SortableContext>
       </main>
     </div>
   );
