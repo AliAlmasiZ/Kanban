@@ -1,5 +1,5 @@
 import type { ColumnType, TaskItem } from '@/types/kanban';
-import { act, useState } from 'react';
+import { act, useEffect, useState } from 'react';
 import BackgroundCanvas from '@/components/BackgroundCanvas';
 import Column from '../components/Column';
 import TaskCard, { TaskCardContent } from '@/components/TaskCard';
@@ -29,24 +29,92 @@ const initialColumns: ColumnType[] = [
         id: 'task-1',
         title: 'Task One',
         description: 'This is task one\nsdkfsfdskfk',
+        createdAt: new Date().toDateString(),
+        labels: [],
       },
-      { id: 'task-3', title: 'Task Three', description: 'This is task three' },
-      { id: 'task-4', title: 'Task Four', description: 'This is task four' },
-      { id: 'task-5', title: 'Task Five', description: 'This is task five' },
-      { id: 'task-6', title: 'Task Six', description: 'This is task six' },
-      { id: 'task-7', title: 'Task Seven', description: 'This is task seven' },
-      { id: 'task-8', title: 'Task Eight', description: 'This is task eight' },
-      { id: 'task-9', title: 'Task Nine', description: 'This is task nine' },
-      { id: 'task-10', title: 'Task Ten', description: 'This is task ten' },
-      { id: 'task-11', title: 'Task Eleven', description: 'This is task eleven' },
-      { id: 'task-12', title: 'Task Twelve', description: 'This is task twelve' },
+      {
+        id: 'task-3',
+        title: 'Task Three',
+        description: 'This is task three',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
+      {
+        id: 'task-4',
+        title: 'Task Four',
+        description: 'This is task four',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
+      {
+        id: 'task-5',
+        title: 'Task Five',
+        description: 'This is task five',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
+      {
+        id: 'task-6',
+        title: 'Task Six',
+        description: 'This is task six',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
+      {
+        id: 'task-7',
+        title: 'Task Seven',
+        description: 'This is task seven',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
+      {
+        id: 'task-8',
+        title: 'Task Eight',
+        description: 'This is task eight',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
+      {
+        id: 'task-9',
+        title: 'Task Nine',
+        description: 'This is task nine',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
+      {
+        id: 'task-10',
+        title: 'Task Ten',
+        description: 'This is task ten',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
+      {
+        id: 'task-11',
+        title: 'Task Eleven',
+        description: 'This is task eleven',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
+      {
+        id: 'task-12',
+        title: 'Task Twelve',
+        description: 'This is task twelve',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
     ],
   },
   {
     id: 'col-2',
     title: 'DONE',
     tasks: [
-      { id: 'task-2', title: 'Task Two', description: 'This is task two' },
+      {
+        id: 'task-2',
+        title: 'Task Two',
+        description: 'This is task two',
+        createdAt: new Date().toDateString(),
+        labels: [],
+      },
     ],
   },
   {
@@ -56,10 +124,22 @@ const initialColumns: ColumnType[] = [
   },
 ];
 
+function getInitialColumns(): ColumnType[] {
+  const storedColumns = localStorage.getItem('columns');
+  if (storedColumns) {
+    return JSON.parse(storedColumns);
+  }
+  return initialColumns;
+}
+
 export default function Home() {
-  const [columns, setColumns] = useState<ColumnType[]>(initialColumns);
+  const [columns, setColumns] = useState<ColumnType[]>(getInitialColumns());
   const [activeTask, setActiveTask] = useState<TaskItem | null>(null);
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem('columns', JSON.stringify(columns));
+  }, [columns]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
