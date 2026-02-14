@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 
 interface TaskCardProps {
   task: TaskItem;
+  dragDisabled?: boolean;
   onDelete?: () => void;
   onClick?: () => void;
 }
@@ -19,6 +20,7 @@ export default function TaskCard(props: TaskCardProps) {
     isDragging,
   } = useSortable({
     id: props.task.id,
+    disabled: false || props.dragDisabled,
     data: { type: 'Task', task: props.task },
   });
 
@@ -48,11 +50,11 @@ export default function TaskCard(props: TaskCardProps) {
   );
 }
 
-export function TaskCardContent({ task, onDelete, onClick }: TaskCardProps) {
+export function TaskCardContent({ task, onDelete, onClick, dragDisabled }: TaskCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group relative bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all w-full"
+      className={`group relative bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all w-full ${dragDisabled ? '' : 'cursor-grab'}`}
     >
       <header className="flex justify-between items-start mb-2">
         <h3 className="font-semibold text-gray-800">{task.title}</h3>

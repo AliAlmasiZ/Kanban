@@ -19,6 +19,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { createPortal } from 'react-dom';
 import Modal from '@/components/Modal';
 import TaskForm from '@/components/TaskForm';
+import SearchBar from '@/components/SearchBar';
 
 // I HATE STYLING
 
@@ -143,10 +144,18 @@ export default function Home() {
   const [addingToColumnId, setAddingToColumnId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
   const [deletingTask, setDeletingTask] = useState<TaskItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterPriority, setFilterPriority] = useState<
+    'All' | 'Low' | 'Medium' | 'High'
+  >('All');
+  const [sortBy, setSortBy] = useState<'Manual' | 'Date' | 'Priority'>(
+    'Manual'
+  );
 
   useEffect(() => {
     localStorage.setItem('columns', JSON.stringify(columns));
   }, [columns]);
+
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -172,6 +181,8 @@ export default function Home() {
       const task = col.tasks.find((t) => t.id === activeId);
       if (task) {
         setActiveTask(task);
+        setSearchQuery('');
+        setFilterPriority('All');
       }
     }
   }
@@ -346,16 +357,57 @@ export default function Home() {
     setDeletingTask(null);
   }
 
+  const filteredColumns = columns.map((col) => {
+    const filteredTasks = col.tasks.filter((task) => {
+      const matchesSearch =
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesPriority =
+        filterPriority === 'All' || task.priority === filterPriority;
+      return matchesSearch && matchesPriority;
+    });
+
+    const sortedTasks = [...filteredTasks].sort((a, b) => {
+      if (sortBy === 'Manual') return 0;
+      if (sortBy === 'Date') {
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      }
+      if (sortBy === 'Priority') {
+        const priorityOrder = { Low: 1, Medium: 2, High: 3 };
+        return (
+          priorityOrder[a.priority || 'Low'] -
+          priorityOrder[b.priority || 'Low']
+        );
+      }
+      return 0;
+    });
+
+    return {
+      ...col,
+      tasks: sortedTasks,
+    };
+  });
+
   function deleteColumn(columnId: string) {
     // setColumns((prevColumns) =>
     //   prevColumns.filter((col) => col.id !== columnId)
     // );
   }
 
-  function deleteTask(colomnId: string, taskId: string) {}
   return (
-    <>
+    <div className="flex flex-col h-screen w-full overflow-hidden">
       <BackgroundCanvas />
+      <SearchBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filterPriority={filterPriority}
+        setFilterPriority={setFilterPriority}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+      />
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -363,8 +415,8 @@ export default function Home() {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="container mx-auto p-10 pb-16  gap-5 h-screen grid grid-cols-1 lg:grid-cols-3 items-stretch">
-          {columns.map((column) => (
+        <div className="container mx-auto pb-16  gap-5 h-full grid grid-cols-1 lg:grid-cols-3 items-stretch">
+          {filteredColumns.map((column) => (
             <Column
               column={column}
               key={column.id}
@@ -377,6 +429,7 @@ export default function Home() {
                 <TaskCard
                   key={task.id}
                   task={task}
+                  dragDisabled={sortBy !== 'Manual'}
                   onDelete={() => {
                     setDeletingTask(task);
                   }}
@@ -389,17 +442,7 @@ export default function Home() {
 
         {createPortal(
           <DragOverlay>
-            {activeTask ? (
-              <TaskCardContent
-                task={activeTask}
-                onDelete={() => {
-                  deleteTask(
-                    findColumnContainingTask(activeTask.id)!.id,
-                    activeTask.id
-                  );
-                }}
-              />
-            ) : null}
+            {activeTask ? <TaskCardContent task={activeTask} /> : null}
           </DragOverlay>,
           document.body
         )}
@@ -452,6 +495,6 @@ export default function Home() {
           </div>
         </Modal>
       </DndContext>
-    </>
+    </div>
   );
 }
