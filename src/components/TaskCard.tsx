@@ -28,8 +28,10 @@ export default function TaskCard({ task, onDelete }: TaskCardProps) {
       <div
         ref={setNodeRef}
         style={style}
-        className="opacity-30 bg-gray-50 p-4 rounded-xl border-2 border-dashed border-gray-300 mb-3 w-full h-25"
-      />
+        className="opacity-30 mb-3 w-full"
+      >
+        <TaskCardContent task={task} onDelete={onDelete} /> 
+      </div>
     );
   }
 
